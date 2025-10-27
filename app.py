@@ -1,15 +1,20 @@
 from flask import Flask, jsonify
 import firebase_admin
 from firebase_admin import credentials, firestore
-import os  # Do odczytania zmiennej
 
 app = Flask(__name__)
 
 # --- INICJALIZACJA FIREBASE ---
-# Użyj klucza ze zmiennej środowiskowej (Secret File)
-key_path = os.environ.get('FIREBASE_KEY_JSON', 'firebase-key.json')
-cred = credentials.Certificate(key_path)
-firebase_admin.initialize_app(cred)
+# Bezpośrednio ładujemy plik o nazwie, którą podaliśmy w Render
+try:
+    cred = credentials.Certificate('firebase-key.json')
+    firebase_admin.initialize_app(cred)
+except FileNotFoundError:
+    print("BŁĄD: Nie znaleziono pliku 'firebase-key.json'.")
+    print("Upewnij się, że dodałeś go jako Secret File w panelu Render.")
+    # Możesz dodać obsługę błędu, jeśli pliku nie ma
+except Exception as e:
+    print(f"Błąd inicjalizacji Firebase: {e}")
 
 # Pobierz klienta bazy danych
 db = firestore.client()
